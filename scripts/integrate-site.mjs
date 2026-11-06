@@ -1,4 +1,4 @@
-import { access, cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, cp, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,14 +16,31 @@ const app = ((await exists(path.join(sourceApp,"layout.tsx"))) || (await exists(
 if (!(await exists(path.join(app,"layout.tsx"))) && !(await exists(path.join(app,"layout.js")))) {
   throw new Error("Target must contain an existing Next.js App Router layout. No files were changed.");
 }
-const route = path.join(app,"play/cheese-doom");
+// Route groups do not contribute URL segments. Follow only group directories,
+// so an unrelated /projects/play page never becomes a candidate for /play.
+async function findPlayDirectories(directory) {
+  const found = [];
+  for (const item of await readdir(directory,{withFileTypes:true})) {
+    if (!item.isDirectory()) continue;
+    const child = path.join(directory,item.name);
+    if (item.name === "play") found.push(child);
+    else if (/^\([^()]+\)$/.test(item.name) && !/^\(\.{1,3}\)$/.test(item.name)) {
+      found.push(...await findPlayDirectories(child));
+    }
+  }
+  return found;
+}
+const playDirectories = await findPlayDirectories(app);
+if (playDirectories.length > 1) throw new Error("More than one /play directory exists across route groups. Resolve the route ambiguity before integration. No files were changed.");
+const play = playDirectories[0] ?? path.join(app,"play");
+const route = path.join(play,"cheese-doom");
 const runtime = path.join(route,"_game");
 if (await exists(path.join(route,"page.tsx"))) {
   const current = await readFile(path.join(route,"page.tsx"),"utf8");
   if (!current.includes('"./_game/PlayPage"')) throw new Error("The new route already exists and is not managed by this installer. No files were changed.");
 }
 if (await exists(path.join(route,"page.js"))) throw new Error("The new route already has a JavaScript page. No files were changed.");
-if (await exists(path.join(app,"play/page.js"))) throw new Error("The old route uses JavaScript. Integrate its redirect manually to avoid conflicting page files. No files were changed.");
+if (await exists(path.join(play,"page.js"))) throw new Error("The old route uses JavaScript. Integrate its redirect manually to avoid conflicting page files. No files were changed.");
 
 // Keep all code and CSS below the new route. No site layout, homepage, package,
 // deployment, DNS or existing asset files are changed.
@@ -45,12 +62,13 @@ export { default } from "./_game/PlayPage";
 `);
 await mkdir(path.join(target,"public"),{recursive:true});
 await cp(path.join(source,"public/cheese-doom"),path.join(target,"public/cheese-doom"),{recursive:true});
-await writeFile(path.join(app,"play/page.tsx"),`import { redirect } from "next/navigation";
+await writeFile(path.join(play,"page.tsx"),`import { redirect } from "next/navigation";
 
 export default function LegacyPlayPage() {
   redirect("/play/cheese-doom");
 }
 `);
 console.log("Installed /play/cheese-doom and redirected /play. Existing homepage links keep working.");
-console.log("Changed only app/play/page.tsx, app/play/cheese-doom/, and public/cheese-doom/.");
+const relativePlay = path.relative(target,play);
+console.log(`Changed only ${relativePlay}/page.tsx, ${relativePlay}/cheese-doom/, and public/cheese-doom/.`);
 console.log("Run the portfolio's checks/build, review its Git diff, then push its deployment branch.");
