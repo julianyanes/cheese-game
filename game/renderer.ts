@@ -8,6 +8,7 @@ export interface Scene {
   cheese: { x: number; y: number };
   secret: { x: number; y: number };
   secretFound: boolean;
+  openedWalls?: { x: number; y: number }[];
   weapon: "hidden" | "ready" | "spent";
   elapsed: number;
   recoil: number;
@@ -64,11 +65,31 @@ function makeCheese(): HTMLCanvasElement {
   return c;
 }
 
-function makeSecret() {
+function makeBlasterPickup() {
   const c = document.createElement("canvas"); c.width = c.height = 128; const p = c.getContext("2d")!;
-  p.strokeStyle = "#c38c42"; p.lineWidth = 3; p.globalAlpha = 0.7;
-  p.beginPath(); p.moveTo(39, 85); p.lineTo(52, 49); p.lineTo(83, 49); p.lineTo(89, 62); p.lineTo(60, 64); p.lineTo(54, 85); p.closePath(); p.stroke();
-  p.beginPath(); p.moveTo(32, 98); p.lineTo(96, 30); p.moveTo(29, 96); p.lineTo(35, 101); p.stroke();
+  const glow = p.createRadialGradient(65, 65, 6, 65, 65, 62);
+  glow.addColorStop(0, "#7ceeff70"); glow.addColorStop(0.5, "#18cfed28"); glow.addColorStop(1, "#18cfed00");
+  p.fillStyle = glow; p.fillRect(0, 0, 128, 128);
+  // A lit pedestal makes the pickup read as an object on the floor.
+  p.fillStyle = "#151f25"; p.beginPath(); p.ellipse(64, 105, 43, 12, 0, 0, Math.PI * 2); p.fill();
+  p.shadowBlur = 10; p.shadowColor = "#58eeff"; p.strokeStyle = "#67eaff"; p.lineWidth = 2;
+  p.beginPath(); p.ellipse(64, 102, 42, 10, 0, 0, Math.PI * 2); p.stroke(); p.shadowBlur = 0;
+  p.fillStyle = "#cf9a35"; p.fillRect(32, 106, 10, 3); p.fillRect(86, 106, 10, 3);
+  // Broad steel receiver, chunky barrel and ribbed grip echo the carried gun.
+  p.strokeStyle = "#10171c"; p.lineWidth = 4; p.lineJoin = "round";
+  p.fillStyle = "#26323c"; p.beginPath(); p.moveTo(44, 65); p.lineTo(65, 64); p.lineTo(62, 94); p.lineTo(42, 92); p.closePath(); p.fill(); p.stroke();
+  const steel = p.createLinearGradient(0, 34, 0, 72);
+  steel.addColorStop(0, "#d0d9dc"); steel.addColorStop(0.25, "#738b99"); steel.addColorStop(0.6, "#394957"); steel.addColorStop(1, "#19232c");
+  p.fillStyle = steel; p.beginPath(); p.moveTo(21, 43); p.lineTo(77, 35); p.lineTo(93, 45); p.lineTo(97, 62); p.lineTo(74, 73); p.lineTo(25, 69); p.closePath(); p.fill(); p.stroke();
+  p.fillStyle = "#8b9da5"; p.fillRect(79, 40, 23, 24); p.strokeRect(79, 40, 23, 24);
+  p.fillStyle = "#101a23"; p.beginPath(); p.ellipse(103, 52, 9, 14, 0, 0, Math.PI * 2); p.fill(); p.stroke();
+  p.shadowBlur = 10; p.shadowColor = "#72edff"; p.fillStyle = "#7af1ff"; p.fillRect(34, 46, 29, 5); p.shadowBlur = 0;
+  p.fillStyle = "#e3b54f"; p.fillRect(24, 55, 5, 11); p.fillRect(68, 49, 7, 14);
+  p.fillStyle = "#13212a"; for (let x = 37; x < 64; x += 6) p.fillRect(x, 57, 3, 8);
+  p.strokeStyle = "#7f929b"; p.lineWidth = 2; for (let y = 74; y < 92; y += 5) { p.beginPath(); p.moveTo(46, y); p.lineTo(59, y + 1); p.stroke(); }
+  p.fillStyle = "#c6d5db"; p.fillRect(49, 31, 18, 6); p.fillRect(27, 40, 4, 3);
+  // The small energy bolt remains legible when the sprite is distant.
+  p.fillStyle = "#ffe394"; p.beginPath(); p.moveTo(61, 12); p.lineTo(51, 27); p.lineTo(59, 27); p.lineTo(54, 37); p.lineTo(72, 20); p.lineTo(63, 20); p.closePath(); p.fill();
   return c;
 }
 
@@ -85,7 +106,7 @@ export class Renderer {
   private textures = [texture(0), texture(1), texture(2), texture(3)];
   private cats = createCatFrames();
   private cheese = makeCheese();
-  private secret = makeSecret();
+  private secret = makeBlasterPickup();
   constructor(private canvas: HTMLCanvasElement, map: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d", { alpha: false })!;
     this.mapCtx = map.getContext("2d")!;
@@ -160,7 +181,7 @@ export class Renderer {
     this.ctx.putImageData(this.image, 0, 0);
     const sprites = [
       { x: s.cheese.x, y: s.cheese.y, z: 0.12 + Math.sin(s.elapsed * 3) * 0.035, size: 0.37, image: this.cheese, cat: false },
-      ...(!s.secretFound ? [{ x: s.secret.x, y: s.secret.y, z: 0.18, size: 0.36, image: this.secret, cat: false }] : []),
+      ...(!s.secretFound ? [{ x: s.secret.x, y: s.secret.y, z: 0.05 + Math.sin(s.elapsed * 3) * 0.035, size: 0.64, image: this.secret, cat: false }] : []),
       { x: s.cat.x, y: s.cat.y, z: s.cat.z, size: 1.12, image: this.cats[s.cat.stunRemaining > 0 ? 0 : Math.floor(s.cat.animTime * 10) % this.cats.length], cat: true },
     ].sort((a, b) => Math.hypot(b.x - s.player.x, b.y - s.player.y) - Math.hypot(a.x - s.player.x, a.y - s.player.y));
     for (const sprite of sprites) {
@@ -237,6 +258,18 @@ export class Renderer {
     for (let y = 0; y < s.cells.length; y++) for (let x = 0; x < s.cells.length; x++) {
       c.fillStyle = s.cells[y][x] === 1 ? "#39403a" : s.cells[y][x] === 2 ? "#3d3d32" : "#171d18";
       c.fillRect(x * unit, y * unit, unit - 0.4, unit - 0.4);
+    }
+    c.strokeStyle = "#549c73"; c.lineWidth = 1;
+    for (const wall of s.openedWalls ?? []) {
+      const x = Math.floor(wall.x), y = Math.floor(wall.y);
+      if (s.cells[y]?.[x] === 0) c.strokeRect(x * unit + 0.7, y * unit + 0.7, unit - 1.8, unit - 1.8);
+    }
+    if (!s.secretFound) {
+      const x = s.secret.x * unit, y = s.secret.y * unit;
+      c.strokeStyle = "#76efff"; c.lineWidth = 1.5;
+      c.strokeRect(x - 3, y - 3, 6, 6);
+      c.beginPath(); c.moveTo(x - 5, y); c.lineTo(x + 5, y); c.moveTo(x, y - 5); c.lineTo(x, y + 5); c.stroke();
+      c.fillStyle = "#ffe394"; c.fillRect(x - 1, y - 1, 2, 2);
     }
     c.fillStyle = "#edc260"; c.beginPath(); c.arc(s.cheese.x * unit, s.cheese.y * unit, 2.4, 0, Math.PI * 2); c.fill();
     if (Math.hypot(s.cat.x - s.player.x, s.cat.y - s.player.y) < 5 || s.cat.stunRemaining > 0) {

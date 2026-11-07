@@ -1,6 +1,6 @@
 # CHEESE // No Safe Corners
 
-A Doom-inspired, first-person cat-and-mouse survival game. Collect cheese, survive three lives, and find the hidden M-01 blaster before the predator adapts.
+A Doom-inspired, first-person cat-and-mouse survival game. Collect cheese, survive three lives, and pick up the visible M-01 blaster near the starting point before the predator adapts.
 
 ## Run
 
@@ -21,19 +21,19 @@ Open http://localhost:3000 or `/play/cheese-doom`. Existing `/play` links redire
 | Look / turn | Mouse while locked, or left / right arrows (Q also turns left) |
 | Forward / backward | Up / down arrows |
 | Sprint | Shift |
-| Search secret | E, near the scratched blaster symbol in a dead end |
-| Fire | Left click while locked, or Space |
+| Equip blaster | Walk over the glowing weapon near spawn |
+| Fire after pickup | Left click while locked, or Space |
 | Pause | Esc, P, or pause button |
 | Mute | M or speaker button |
 
-Touch devices have movement, turn, sprint, use and fire buttons; drag the scene to look. Click **Enter the Maze** to unlock audio and mouse look. If a browser refuses pointer lock, the keyboard remains usable. Losing focus pauses the hunt.
+Touch devices use a Pocket Edition style left joystick for proportional movement and strafing, with right-side swipes to look and a sprint toggle. The Fire button appears only after automatically picking up the blaster and disappears when its shot is spent. The joystick and look gestures track independent fingers and clear safely on release, cancellation, pause, or capture. Click **Enter the Maze** to unlock audio and mouse look. If a browser refuses pointer lock, the keyboard remains usable. Losing focus pauses the hunt.
 
 ## The hunt
 
 - Movement uses elapsed time, acceleration and circular collision with wall sliding; running reaches 5.2 cells/second and sprinting reaches 7.2. Diagonals are normalized.
 - The camera-plane DDA raycaster uses perpendicular depth and unclipped texture coordinates. Floor and ceiling textures are anchored in world space. Render buffers are reused at a bounded internal resolution.
-- The cat continuously navigates the maze. Time, cheese and lost lives increase adaptation. At 25% it can telegraph and vault walls; at 55% it predicts movement and can tear out interior walls. Debris and changes to the minimap reveal permanent passages. Boundary walls remain intact.
-- A reachable dead end hides the blaster. Search near its subtle symbol to reveal it. There is **one shot per entire run**, including all three lives. Aim at the cat within ten cells and with clear line of sight: a hit explodes into debris, disables capture and freezes the cat for **five simulation seconds**. Missing spends the shot too. Pausing freezes the countdown. A new run resets the weapon and maze.
+- The cat continuously navigates the maze. Time, cheese and lost lives increase adaptation. At 25% it can telegraph and vault walls; at 55% it predicts movement and can tear out interior walls. Destroyed walls immediately become ordinary floor for both the player and cat. Debris and green minimap outlines reveal these permanent shortcuts; they stay open after respawning. Boundary walls remain intact.
+- A glowing blaster sits in plain sight a short, unobstructed walk from spawn. Walk over it to equip it automatically; no digging or interaction button is needed. Its cyan minimap marker helps locate it. There is **one shot per entire run**, including all three lives. Fire controls become available after pickup. Aim at the cat within ten cells and with clear line of sight: a hit explodes into debris, disables capture and freezes the cat for **five simulation seconds**. Missing spends the shot too. Pausing freezes the countdown. A new run resets the weapon and maze.
 - Three captures end the run. Respawns preserve the changing maze; your best completed score is saved locally when storage is available.
 
 ## Validation
@@ -58,7 +58,7 @@ The root `page.tsx` remains the game component so it can also be integrated into
 
 ## Integrate with julianyanes.com
 
-The live portfolio is a separate Next.js/Vercel project. Its Sky Arcade Cheese selector and **Board Ride** button currently link to `/play`. Install this version into the portfolio checkout with:
+The live portfolio is a separate Next.js/Vercel project. Its Sky Arcade Cheese selector and **Board Ride** button link to `/play/cheese-doom`; older `/play` links continue through the redirect. Install this version into the portfolio checkout with:
 
 ```sh
 node scripts/integrate-site.mjs /absolute/path/to/portfolio-repository

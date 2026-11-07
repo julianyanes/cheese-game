@@ -19,9 +19,12 @@ export class CheeseGame {
   private audio = new GameAudio();
   private keys = new Set<string>();
   private touches = new Set<string>();
+  private moveInput = { x: 0, y: 0 };
+  private lookPointerId: number | null = null;
   private mouseDelta = 0;
   private turnVelocity = 0;
   private particles: Particle[] = [];
+  private openedWalls: Vec[] = [];
   private elapsed = 0;
   private progress = 0;
   private score = 0;
@@ -55,7 +58,7 @@ export class CheeseGame {
     this.listen(window, "keydown", this.onKeyDown as EventListener);
     this.listen(window, "keyup", ((e: KeyboardEvent) => { this.keys.delete(e.code); }) as EventListener);
     this.listen(document, "mousemove", ((e: MouseEvent) => {
-      if (document.pointerLockElement === canvas && this.mode === "playing") this.mouseDelta += e.movementX * 0.0023;
+      if (document.pointerLockElement === canvas && this.mode === "playing" && this.deathTimer <= 0) this.mouseDelta += e.movementX * 0.0023;
     }) as EventListener);
     this.listen(canvas, "mousedown", ((e: MouseEvent) => {
       if (e.button !== 0 || this.mode !== "playing") return;
@@ -67,15 +70,31 @@ export class CheeseGame {
     });
     this.listen(canvas, "contextmenu", e => e.preventDefault());
     this.listen(canvas, "pointerdown", ((e: PointerEvent) => {
-      if (e.pointerType === "touch") { this.touchX = e.clientX; canvas.setPointerCapture(e.pointerId); }
+      if (e.pointerType !== "touch" || this.mode !== "playing" || this.deathTimer > 0 || this.lookPointerId !== null) return;
+      const bounds = canvas.getBoundingClientRect();
+      if (e.clientX < bounds.left + bounds.width * 0.4) return;
+      e.preventDefault(); this.lookPointerId = e.pointerId; this.touchX = e.clientX;
+      try { canvas.setPointerCapture(e.pointerId); } catch { /* Pointer may already have been cancelled. */ }
     }) as EventListener);
     this.listen(canvas, "pointermove", ((e: PointerEvent) => {
-      if (e.pointerType === "touch" && e.buttons && this.mode === "playing") { this.mouseDelta += (e.clientX - this.touchX) * 0.006; this.touchX = e.clientX; }
+      if (e.pointerId === this.lookPointerId && this.mode === "playing") {
+        e.preventDefault(); this.mouseDelta += (e.clientX - this.touchX) * 0.006; this.touchX = e.clientX;
+      }
     }) as EventListener);
+    const releaseLook = ((e: PointerEvent) => {
+      if (e.pointerId === this.lookPointerId) this.clearLookPointer();
+    }) as EventListener;
+    this.listen(canvas, "pointerup", releaseLook);
+    this.listen(canvas, "pointercancel", releaseLook);
+    this.listen(canvas, "lostpointercapture", releaseLook);
     this.publish();
     this.raf = requestAnimationFrame(this.frame);
   }
   private touchX = 0;
+  private clearLookPointer() {
+    const id = this.lookPointerId; this.lookPointerId = null;
+    if (id !== null && this.canvas.hasPointerCapture(id)) this.canvas.releasePointerCapture(id);
+  }
   private listen(target: EventTarget, type: string, fn: EventListener) {
     target.addEventListener(type, fn); this.listeners.push(() => target.removeEventListener(type, fn));
   }
@@ -95,12 +114,12 @@ export class CheeseGame {
   };
   start = () => {
     if (this.mode === "dead") this.reset();
-    this.mode = "playing"; this.keys.clear(); this.touches.clear(); this.mouseDelta = 0; this.lastTime = performance.now();
+    this.mode = "playing"; this.keys.clear(); this.touches.clear(); this.moveInput = {x:0,y:0}; this.clearLookPointer(); this.mouseDelta = 0; this.lastTime = performance.now();
     void this.audio.start(); this.lockPointer(); this.publish();
   };
   pause = () => {
     if (this.mode !== "playing") return;
-    this.mode = "paused"; this.keys.clear(); this.touches.clear(); this.mouseDelta = 0; this.velocity = {x:0,y:0}; this.player.speed = 0;
+    this.mode = "paused"; this.keys.clear(); this.touches.clear(); this.moveInput = {x:0,y:0}; this.clearLookPointer(); this.mouseDelta = 0; this.velocity = {x:0,y:0}; this.player.speed = 0;
     this.turnVelocity = 0;
     this.audio.setPaused(true);
     if (document.pointerLockElement === this.canvas) document.exitPointerLock();
@@ -108,6 +127,10 @@ export class CheeseGame {
   };
   toggleMute = () => { this.muted = !this.muted; this.audio.setMuted(this.muted); this.publish(); };
   touch = (key: string, pressed: boolean) => { if (pressed) this.touches.add(key); else this.touches.delete(key); };
+  setMoveInput = (strafe: number, forward: number) => {
+    const clamp = (value: number) => Number.isFinite(value) ? Math.max(-1,Math.min(1,value)) : 0;
+    this.moveInput = this.mode === "playing" && this.deathTimer <= 0 ? {x:clamp(strafe),y:clamp(forward)} : {x:0,y:0};
+  };
   look = (delta: number) => { this.mouseDelta += delta; };
   private down(key: string) { return this.keys.has(key) || this.touches.has(key); }
   private faceOpening() {
@@ -119,20 +142,23 @@ export class CheeseGame {
     this.maze = createMaze(); this.player = {...this.maze.spawn, angle:0, bob:0, speed:0}; this.faceOpening();
     this.cat = createCat(this.maze.catSpawn); this.cheese = {...this.maze.cheeseSpawn};
     this.velocity = {x:0,y:0}; this.turnVelocity = 0; this.elapsed = 0; this.progress = 0; this.score = 0; this.cheeseCount = 0;
-    this.lives = 3; this.weapon = "hidden"; this.particles = []; this.deathTimer = 0; this.hurt = 0; this.recoil = 0; this.shake = 0;
+    this.lives = 3; this.weapon = "hidden"; this.particles = []; this.openedWalls = []; this.deathTimer = 0; this.hurt = 0; this.recoil = 0; this.shake = 0;
     this.announce("FIND THE CHEESE. STAY ALIVE.", 4);
   }
   private announce(message: string, seconds = 3) { this.message = message; this.messageUntil = this.elapsed + seconds; }
   interact = () => {
     if (this.mode !== "playing" || this.deathTimer > 0 || this.weapon !== "hidden") return;
-    if (Math.hypot(this.player.x - this.maze.secret.x, this.player.y - this.maze.secret.y) < 1.15) {
+    const dx = this.maze.secret.x-this.player.x, dy = this.maze.secret.y-this.player.y;
+    const distance = Math.hypot(dx,dy);
+    if (distance <= 0.65 && (distance < 0.001 || castRay(this.maze.cells,this.player.x,this.player.y,dx/distance,dy/distance).distance >= distance)) {
       this.weapon = "ready"; this.score += 250; this.audio.effect("secret");
-      this.announce("SECRET FOUND // M-01 BLASTER. ONE SHOT. MAKE IT COUNT.", 6); this.publish();
+      this.hint = "";
+      this.announce("M-01 BLASTER EQUIPPED // ONE SHOT. MAKE IT COUNT.", 5); this.publish();
     }
   };
   fire = () => {
     if (this.mode !== "playing" || this.deathTimer > 0) return;
-    if (this.weapon !== "ready") { this.announce(this.weapon === "hidden" ? "SOMETHING IS HIDDEN IN THESE WALLS." : "CHAMBER EMPTY. RUN.", 2); return; }
+    if (this.weapon !== "ready") return;
     this.weapon = "spent"; this.recoil = 1; this.shake = 2; this.audio.effect("blast");
     const dx = this.cat.x - this.player.x, dy = this.cat.y - this.player.y, distance = Math.hypot(dx, dy);
     const forward = dx * Math.cos(this.player.angle) + dy * Math.sin(this.player.angle);
@@ -155,19 +181,23 @@ export class CheeseGame {
   private catEvent = (event: CatEvent, at: Vec) => {
     const distance = Math.hypot(at.x - this.player.x, at.y - this.player.y);
     if (distance < 11) this.audio.effect(event);
-    if (event === "break") { this.burst(at, 35, "#a59371", 0.65); if (distance < 8) this.shake = 1.3; this.announce("IT IS TEARING THE MAZE APART.", 3); }
+    if (event === "break") {
+      this.openedWalls.push({x:at.x,y:at.y});
+      this.burst(at, 35, "#a59371", 0.65); if (distance < 8) this.shake = 1.3;
+      this.announce("NEW PASSAGE OPEN // RUN THROUGH THE BREACH.", 4);
+    }
     if (event === "jump" && distance < 8) this.announce("IT CAN CLEAR THE WALLS.", 2.5);
     if (event === "land" && distance < 6) this.shake = 0.6;
   };
   private move(dt: number) {
-    const forward = Number(this.down("KeyW") || this.down("ArrowUp")) - Number(this.down("KeyS") || this.down("ArrowDown"));
-    const strafe = Number(this.down("KeyD")) - Number(this.down("KeyA"));
+    const forward = Number(this.down("KeyW") || this.down("ArrowUp")) - Number(this.down("KeyS") || this.down("ArrowDown")) + this.moveInput.y;
+    const strafe = Number(this.down("KeyD")) - Number(this.down("KeyA")) + this.moveInput.x;
     const turn = Number(this.down("ArrowRight")) - Number(this.down("ArrowLeft") || this.down("KeyQ"));
     this.turnVelocity += (turn * 3.6 - this.turnVelocity) * (1 - Math.exp(-18 * dt));
     const look = this.mouseDelta * (1 - Math.exp(-55 * dt)); this.mouseDelta -= look;
     this.player.angle = (this.player.angle + this.turnVelocity * dt + look) % (Math.PI * 2);
     const sprint = this.down("ShiftLeft") || this.down("ShiftRight");
-    const speed = sprint ? 7.2 : 5.2, norm = Math.hypot(forward, strafe) || 1;
+    const speed = sprint ? 7.2 : 5.2, norm = Math.max(1,Math.hypot(forward, strafe));
     const dirX = Math.cos(this.player.angle), dirY = Math.sin(this.player.angle);
     const targetX = (dirX * forward - dirY * strafe) / norm * speed;
     const targetY = (dirY * forward + dirX * strafe) / norm * speed;
@@ -213,6 +243,7 @@ export class CheeseGame {
       }
     } else {
       this.move(dt);
+      this.interact(); // Walking over a visible blaster equips it; no search/use action required.
       const previous = this.progress;
       this.progress = Math.min(1, this.elapsed / 180 + this.cheeseCount * 0.1 + (3-this.lives)*0.08);
       if (previous < 0.25 && this.progress >= 0.25) this.announce("PREDATOR ADAPTING // WALLS ARE NO LONGER SAFE.", 5);
@@ -220,9 +251,12 @@ export class CheeseGame {
       updateCat(this.cat, this.maze, this.player, this.velocity, dt, this.elapsed, this.progress, this.catEvent);
       if (Math.hypot(this.player.x - this.cheese.x, this.player.y - this.cheese.y) < 0.46) this.pickup();
       if (this.cat.stunRemaining <= 0 && this.cat.z < 0.4 && Math.hypot(this.player.x - this.cat.x, this.player.y - this.cat.y) < 0.43) {
-        this.lives--; this.hurt = 1; this.shake = 3; this.deathTimer = 1.25; this.audio.effect("hurt"); this.announce("CAUGHT // " + this.lives + " LIVES REMAIN", 3);
+        this.lives--; this.hurt = 1; this.shake = 3; this.deathTimer = 1.25;
+        this.keys.clear(); this.touches.clear(); this.moveInput = {x:0,y:0}; this.clearLookPointer(); this.velocity = {x:0,y:0}; this.mouseDelta = 0; this.turnVelocity = 0;
+        this.audio.effect("hurt"); this.announce("CAUGHT // " + this.lives + " LIVES REMAIN", 3);
       }
-      this.hint = this.weapon === "hidden" && Math.hypot(this.player.x-this.maze.secret.x,this.player.y-this.maze.secret.y) < 1.15 ? "[ E ] SEARCH THE HOLLOW WALL" : "";
+      const gunDistance = Math.hypot(this.player.x-this.maze.secret.x,this.player.y-this.maze.secret.y);
+      this.hint = this.weapon === "hidden" && gunDistance < 4 ? "WALK OVER THE GLOWING BLASTER TO EQUIP" : "";
     }
     for (const p of this.particles) { p.life -= dt; p.x += p.vx*dt; p.y += p.vy*dt; p.z += p.vz*dt; p.vz -= dt*6; if (p.z < 0.02) { p.z=0.02; p.vz *= -0.25; p.vx *= 0.8; p.vy *= 0.8; } }
     this.particles = this.particles.filter(p=>p.life>0);
@@ -247,12 +281,12 @@ export class CheeseGame {
     if (this.disposed) return;
     const dt = this.lastTime ? Math.min(0.05, (now-this.lastTime)/1000) : 0; this.lastTime = now;
     if (this.mode === "playing") this.tick(dt);
-    this.renderer.render({cells:this.maze.cells,player:this.player,cat:this.cat,cheese:this.cheese,secret:this.maze.secret,secretFound:this.weapon!=="hidden",weapon:this.weapon,elapsed:this.elapsed,recoil:this.recoil,hurt:this.hurt,shake:this.shake,threat:this.threat(),particles:this.particles});
+    this.renderer.render({cells:this.maze.cells,player:this.player,cat:this.cat,cheese:this.cheese,secret:this.maze.secret,secretFound:this.weapon!=="hidden",weapon:this.weapon,elapsed:this.elapsed,recoil:this.recoil,hurt:this.hurt,shake:this.shake,threat:this.threat(),particles:this.particles,openedWalls:this.openedWalls});
     if (now-this.lastHUD > 80) { this.publish(); this.lastHUD=now; }
     this.raf = requestAnimationFrame(this.frame);
   };
   dispose() {
-    this.disposed = true; cancelAnimationFrame(this.raf); this.listeners.forEach(remove=>remove()); this.audio.dispose();
+    this.disposed = true; this.clearLookPointer(); cancelAnimationFrame(this.raf); this.listeners.forEach(remove=>remove()); this.audio.dispose();
     if (document.pointerLockElement === this.canvas) document.exitPointerLock();
   }
 }

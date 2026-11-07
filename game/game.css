@@ -9,5 +9,85 @@
 @media(max-width:1100px){.game-shell .intro{padding-left:5%;padding-right:5%;gap:5%}.game-shell .intro-main{width:55%}.game-shell .briefing{width:310px;padding:20px 22px 0}.game-shell .briefing-foot{margin:0 -22px;padding:13px 22px}.game-shell .sector{font-size:7px}.game-shell .sector-number{display:none}.game-shell .hud-cell{padding:16px 20px}.game-shell .vital{min-width:140px}.game-shell .score{min-width:150px}.game-shell .ammo{min-width:160px}.game-shell .intro h1{font-size:16vw}.game-shell .sound-note{font-size:6px;gap:5px}}
 @media(max-height:760px) and (min-width:761px){.game-shell .topbar{height:66px}.game-shell .intro{padding-top:88px;padding-bottom:78px}.game-shell .intro h1{font-size:13vw;margin-top:22px}.game-shell .intro-copy{margin:14px 0 20px;font-size:11px}.game-shell .briefing{padding-top:17px}.game-shell .briefing-header{padding-bottom:15px}.game-shell .protocol{margin-top:16px}.game-shell .protocol h2{font-size:18px;margin-bottom:4px}.game-shell .protocol p{font-size:8px}.game-shell .controls-guide{margin-top:17px;padding:14px 0;gap:6px}.game-shell .intro-footer{height:50px}.game-shell .objective,.game-shell .predator{top:90px}.game-shell .dialog h1{font-size:80px}.game-shell .dialog p{margin-bottom:20px}.game-shell .map-panel{width:150px;bottom:145px}.game-shell .map-panel canvas{width:128px;height:128px}.game-shell .bottom-hud{min-height:95px;bottom:20px}.game-shell .hud-cell{padding-top:13px;padding-bottom:13px}.game-shell .run-clock{bottom:128px}.game-shell .game-message{top:58%}}
 @media(max-width:760px){.game-shell{min-height:480px}.game-shell .topbar{height:65px;padding:0 6%}.game-shell .wordmark{font-size:24px}.game-shell .sector{display:none}.game-shell .intro{padding:95px 7% 70px;align-items:flex-start;overflow-y:auto;display:block;background:linear-gradient(110deg,#10160ff5,#10160fe8)}.game-shell .intro-main{width:100%;max-width:none}.game-shell .intro h1{font-size:29vw;margin:25px 0 16px;line-height:.8}.game-shell .eyebrow{font-size:7px;letter-spacing:1.2px}.game-shell .title-rule{font-size:8px;padding:11px 0}.game-shell .title-rule>span+span{font-size:7px}.game-shell .intro-copy{font-size:11px;margin:15px 0 20px}.game-shell .start-button{width:100%;padding:19px 21px;font-size:10px}.game-shell .sound-note{font-size:6px;margin-top:13px}.game-shell .briefing{width:100%;margin:30px 0 15px;background:none;padding:20px 18px 0}.game-shell .briefing .protocol{margin-top:18px}.game-shell .protocol p{font-size:9px}.game-shell .protocol h2{font-size:19px}.game-shell .briefing-foot{margin:0 -18px;padding:12px 18px}.game-shell .controls-guide{display:grid;grid-template-columns:1fr 1fr;column-gap:18px}.game-shell .controls-guide>div{flex-direction:column;align-items:flex-start;gap:6px}.game-shell .intro-footer{position:relative;left:0;right:0;height:55px;font-size:6px;letter-spacing:.7px}.game-shell .footer-warning{display:none}.game-shell .objective{top:88px;left:6%}.game-shell .objective strong{font-size:18px}.game-shell .objective-line{display:none}.game-shell .objective .micro{font-size:6px}.game-shell .predator{top:88px;right:6%;width:135px}.game-shell .predator .micro{font-size:5px;letter-spacing:.6px}.game-shell .phase{font-size:6px}.game-shell .game-message{font-size:8px;left:8%;right:8%;top:55%;line-height:1.8}.game-shell .bottom-hud{left:4%;right:4%;bottom:13px;min-height:80px}.game-shell .hud-cell{padding:10px;gap:6px;min-width:0;flex:1}.game-shell .hud-cell strong{font-size:26px}.game-shell .hud-cell .micro{font-size:5px;letter-spacing:.6px}.game-shell .hud-detail{font-size:5px;letter-spacing:.5px}.game-shell .lives{font-size:17px;gap:4px;line-height:22px}.game-shell .threat-meter{display:none}.game-shell .ammo{flex:1.1}.game-shell .ammo small{font-size:12px}.game-shell .run-clock{left:4%;bottom:102px;font-size:6px}.game-shell .map-panel{right:4%;bottom:112px;width:106px;padding:6px}.game-shell .map-panel canvas{width:92px;height:92px}.game-shell .map-panel>.micro{font-size:5px;letter-spacing:.4px;padding-bottom:5px}.game-shell .map-caption{font-size:5px;margin-top:6px;gap:4px}.game-shell .map-caption .status-dot{width:3px;height:3px}.game-shell .dialog h1{font-size:78px}.game-shell .dialog p{font-size:11px}.game-shell .death-stats{gap:25px}.game-shell .death-stats strong{font-size:26px}.game-shell .pause-controls{font-size:8px}.game-shell.mode-paused .map-panel{display:none}}
-@media(pointer:coarse){.game-shell .touch-controls{position:absolute;left:5%;right:5%;bottom:119px;display:flex;align-items:end;justify-content:space-between;pointer-events:auto}.game-shell .touch-pad{display:grid;grid-template-columns:repeat(3,40px);gap:5px}.game-shell .touch-controls button{height:40px;min-width:40px;background:#0d180dcc;border:1px solid #b8c39e66;color:#dedcc6;touch-action:none;font-size:18px}.game-shell .touch-controls button:active{background:#b39144bb;color:#10190c}.game-shell .touch-actions{display:flex;gap:5px}.game-shell .touch-actions button{font-size:9px;padding:0 10px}.game-shell .map-panel{bottom:auto;top:147px}.game-shell .game-message{top:53%}.game-shell .controls-guide{display:none}.game-shell .briefing:after{content:"TOUCH: DRAG TO LOOK · USE THE ON-SCREEN CONTROLS";position:static;width:auto;height:auto;display:block;border:0;font-size:7px;line-height:1.8;color:var(--muted);padding:16px 0}.game-shell .briefing-foot{margin-top:20px}}
+/* Touch controls stay inside the game so the portfolio's layout is unaffected. */
+.game-shell .touch-instructions{display:none}
+@media(pointer:coarse){
+  .game-shell{min-height:0;overscroll-behavior:none}
+  .game-shell.mode-playing{touch-action:none}
+  .game-shell .topbar{height:calc(65px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);padding-left:max(5%,calc(env(safe-area-inset-left) + 12px));padding-right:max(5%,calc(env(safe-area-inset-right) + 12px))}
+  .game-shell .intro{touch-action:pan-y;overscroll-behavior:contain;padding-top:calc(95px + env(safe-area-inset-top));padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+  .game-shell .objective,.game-shell .predator{top:calc(88px + env(safe-area-inset-top))}
+  .game-shell .touch-controls{position:absolute;inset:0;display:block;pointer-events:none;user-select:none;-webkit-user-select:none}
+  .game-shell .touch-controls button{pointer-events:auto;touch-action:none;-webkit-user-select:none;user-select:none}
+  .game-shell .movement-controls{position:absolute;left:max(6%,calc(env(safe-area-inset-left) + 16px));bottom:calc(130px + env(safe-area-inset-bottom));width:124px;height:124px}
+  .game-shell .movement-joystick{position:relative;display:grid;place-items:center;width:100%;height:100%;padding:0;border:1px solid #c4ccb84d;border-radius:50%;background:radial-gradient(circle,#26332450 30%,#10190e88 70%);box-shadow:inset 0 0 0 9px #c4ccb805,0 3px 20px #0003;overflow:visible}
+  .game-shell .movement-joystick.active{border-color:#e9bc5e99;background:radial-gradient(circle,#46513566,#10190e99 70%)}
+  .game-shell .joystick-track{position:absolute;inset:20px;border:1px solid #b9c5a52b;border-radius:50%;pointer-events:none}
+  .game-shell .joystick-track i{position:absolute;left:50%;top:0;bottom:0;border-left:1px solid #b9c5a51f}
+  .game-shell .joystick-track i+i{left:0;right:0;top:50%;bottom:auto;border-left:0;border-top:1px solid #b9c5a51f}
+  .game-shell .joystick-thumb{display:block;width:42px;height:42px;border:1px solid #d2d7bf88;border-radius:50%;background:radial-gradient(circle at 40% 30%,#88917bc4,#42503ed9);box-shadow:0 3px 9px #0005,inset 0 0 0 4px #cbd0b517;pointer-events:none;will-change:transform}
+  .game-shell .movement-joystick.active .joystick-thumb{border-color:#e9bc5eb3;background:radial-gradient(circle at 40% 30%,#c1b179dd,#6c6c43e6)}
+  .game-shell .sprint-toggle{position:absolute;left:0;right:0;top:-47px;height:34px;display:flex;align-items:center;justify-content:center;gap:7px;border:1px solid #b8c39e55;border-radius:4px;background:#0e190ed9;color:#c4cbb4;font-size:8px;letter-spacing:.6px}
+  .game-shell .sprint-toggle>span{font-size:21px;line-height:1}
+  .game-shell .sprint-toggle i{font-size:6px;font-style:normal;color:#75816b}
+  .game-shell .sprint-toggle.active{border-color:#e9bc5e99;background:#827036bc;color:#f4dfaa}
+  .game-shell .sprint-toggle.active i{color:#f4dfaa}
+  .game-shell .touch-label{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:6px;letter-spacing:1.2px;color:#adb69b99;pointer-events:none}
+  .game-shell .fire-button{position:absolute;right:max(7%,calc(env(safe-area-inset-right) + 16px));bottom:calc(147px + env(safe-area-inset-bottom));width:78px;height:78px;padding:12px 0 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid #e9bc5eb3;border-radius:50%;background:radial-gradient(circle,#9c572482,#251b10c9);box-shadow:0 0 25px #e98a2c1c,inset 0 0 0 5px #e9bc5e0f;color:#f2d391}
+  .game-shell .fire-button span{font-size:8px;letter-spacing:1.4px}
+  .game-shell .fire-button:active{background:#d68b3ed9;transform:scale(.96)}
+  .game-shell .look-guide{position:absolute;right:max(6%,calc(env(safe-area-inset-right) + 12px));bottom:calc(250px + env(safe-area-inset-bottom));font-size:6px;letter-spacing:1px;color:#adb69b80;pointer-events:none}
+  .game-shell .map-panel{bottom:auto;top:calc(147px + env(safe-area-inset-top));right:max(4%,calc(env(safe-area-inset-right) + 8px));width:112px;padding:7px}
+  .game-shell .map-panel canvas{width:96px;height:96px}
+  .game-shell .map-panel>.micro{font-size:5px;letter-spacing:.4px;padding-bottom:5px}
+  .game-shell .map-caption{font-size:5px;gap:4px;margin-top:6px}
+  .game-shell .game-message{top:50%;left:10%;right:10%;line-height:1.8;font-size:8px}
+  .game-shell .bottom-hud{left:max(4%,calc(env(safe-area-inset-left) + 8px));right:max(4%,calc(env(safe-area-inset-right) + 8px));bottom:calc(13px + env(safe-area-inset-bottom));min-height:80px}
+  .game-shell .hud-cell{min-width:0;flex:1;padding:10px;gap:6px}
+  .game-shell .hud-cell strong{font-size:26px}
+  .game-shell .hud-cell .micro{font-size:5px;letter-spacing:.6px}
+  .game-shell .hud-detail{font-size:5px;letter-spacing:.5px}
+  .game-shell .threat-meter{display:none}
+  .game-shell .run-clock{bottom:calc(102px + env(safe-area-inset-bottom))}
+  .game-shell .controls-guide,.game-shell .pause-controls{display:none}
+  .game-shell .touch-instructions{display:block;margin:20px 0;padding-top:15px;border-top:1px solid var(--line);font-size:9px;line-height:1.9;color:#a1ac92}
+  .game-shell .pause-touch{margin-top:25px}
+  .game-shell .briefing-foot{margin-top:20px}
+}
+@media(pointer:coarse) and (max-height:520px) and (orientation:landscape){
+  .game-shell .topbar{height:calc(49px + env(safe-area-inset-top))}
+  .game-shell .wordmark{font-size:21px}
+  .game-shell .sector,.game-shell .objective{display:none}
+  .game-shell .predator{top:calc(65px + env(safe-area-inset-top));right:max(4%,calc(env(safe-area-inset-right) + 8px));width:125px}
+  .game-shell .predator .micro{font-size:5px;letter-spacing:.5px}
+  .game-shell .progress-track{margin:6px 0}
+  .game-shell .phase{font-size:6px}
+  .game-shell .map-panel{top:calc(65px + env(safe-area-inset-top));left:max(4%,calc(env(safe-area-inset-left) + 8px));right:auto;width:88px;padding:5px}
+  .game-shell .map-panel canvas{width:76px;height:76px}
+  .game-shell .map-panel>.micro,.game-shell .map-caption{display:none}
+  .game-shell .movement-controls{bottom:calc(96px + env(safe-area-inset-bottom));width:104px;height:104px}
+  .game-shell .sprint-toggle{top:-40px;height:30px}
+  .game-shell .joystick-thumb{width:36px;height:36px}
+  .game-shell .joystick-track{inset:17px}
+  .game-shell .touch-label{bottom:-15px;font-size:5px}
+  .game-shell .fire-button{bottom:calc(109px + env(safe-area-inset-bottom));width:68px;height:68px;gap:4px}
+  .game-shell .fire-button svg{width:24px;height:24px}
+  .game-shell .look-guide{display:none}
+  .game-shell .game-message{top:48%;left:25%;right:25%;font-size:7px}
+  .game-shell .bottom-hud{bottom:calc(8px + env(safe-area-inset-bottom));min-height:66px}
+  .game-shell .hud-cell{padding:7px 12px;gap:3px}
+  .game-shell .hud-cell strong{font-size:23px}
+  .game-shell .lives{font-size:16px;line-height:20px}
+  .game-shell .run-clock{bottom:calc(80px + env(safe-area-inset-bottom))}
+  .game-shell .intro{display:block;overflow-y:auto;padding:calc(70px + env(safe-area-inset-top)) max(7%,calc(env(safe-area-inset-right) + 12px)) 30px max(7%,calc(env(safe-area-inset-left) + 12px))}
+  .game-shell .intro-main{width:100%;max-width:520px}
+  .game-shell .intro h1{font-size:100px;margin:20px 0 16px}
+  .game-shell .intro-copy{font-size:11px}
+  .game-shell .briefing{width:100%;max-width:520px;margin:25px 0;background:none}
+  .game-shell .intro-footer{position:relative;left:0;right:0;height:45px;max-width:520px;font-size:6px;margin-top:20px}
+  .game-shell .footer-warning{display:none}
+  .game-shell .pause-overlay,.game-shell .death-overlay{overflow-y:auto;align-items:flex-start;padding:calc(76px + env(safe-area-inset-top)) 25px 25px}
+  .game-shell .dialog h1{font-size:57px;margin:16px 0}
+  .game-shell .dialog p{font-size:10px;margin-bottom:18px}
+}
 @media(prefers-reduced-motion:reduce){.game-shell,.game-shell *{transition:none!important}.game-shell .grain{display:none}}

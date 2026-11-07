@@ -6,6 +6,7 @@ export interface Maze {
   spawn: Vec;
   catSpawn: Vec;
   cheeseSpawn: Vec;
+  /** Uncollected blaster location; retained as `secret` for scene compatibility. */
   secret: Vec;
 }
 export type CatState = 'stalk' | 'chase' | 'windup' | 'leap' | 'break' | 'stunned';
@@ -78,9 +79,18 @@ export function createMaze(random: () => number = Math.random): Maze {
     const d=distances.get(key(p.x,p.y))!;
     return d>Math.min(12,maxDistance*.4)&&d<maxDistance*.65&&distance(p,catCell)>5;
   })??ranked[Math.floor(ranked.length/2)];
-  const deadEnds=ranked.filter(p=>DIRECTIONS.filter(d=>cell(cells,p.x+d.x,p.y+d.y)===0).length===1
-    &&distance(p,catCell)>3&&distance(p,cheeseCell)>2&&distances.get(key(p.x,p.y))!>8);
-  const secretCell=deadEnds[0]??ranked.find(p=>distance(p,catCell)>4&&distance(p,cheeseCell)>3)??ranked[1];
+  // Match the initial facing direction: the blaster is in plain sight two steps
+  // down the opening corridor, rather than tucked in a distant dead end.
+  const opening=DIRECTIONS.find(d=>cell(cells,1+d.x,1+d.y)===0)!;
+  const nearby=queue.filter(p=>{
+    const steps=distances.get(key(p.x,p.y))!;
+    return steps>=2&&steps<=4&&distance(p,catCell)>0&&distance(p,cheeseCell)>0;
+  });
+  const secretCell=nearby.find(p=>p.x===1+opening.x*2&&p.y===1+opening.y*2)
+    ??nearby.find(p=>{
+      const dx=p.x-1,dy=p.y-1,d=Math.hypot(dx,dy);
+      return castRay(cells,1.5,1.5,dx/d,dy/d).distance>d;
+    })??nearby[0];
   return {cells,size,spawn:center(1,1),catSpawn:center(catCell.x,catCell.y),
     cheeseSpawn:center(cheeseCell.x,cheeseCell.y),secret:center(secretCell.x,secretCell.y)};
 }
